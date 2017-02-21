@@ -42,10 +42,33 @@ var rasterizeHTML = (function (util, browser, rasterize) {
         return rasterize.rasterize(element, params.canvas, constructOptions(params));
     };
 
+   module._getNormalizedSvg = function () {
+       var doc = arguments[0],
+           optionalArguments = Array.prototype.slice.call(arguments, 1),
+           params = util.parseOptionalParameters(optionalArguments);
+
+       var element = doc.documentElement ? doc.documentElement : doc;
+
+       return rasterize.getNormalizedSvg(element, constructOptions(params));
+   };
+
     var drawHTML = function (html, canvas, options) {
         var doc = browser.parseHTML(html);
 
         return module.drawDocument(doc, canvas, options);
+    };
+
+    var getNormalizedSvg = function (html, options) {
+        var doc = browser.parseHTML(html);
+
+        return module._getNormalizedSvg(doc, options);
+    };
+
+    module.getNormalizedSvg = function () {
+        var html = arguments[0],
+            optionalArguments = Array.prototype.slice.call(arguments, 1),
+            params = util.parseOptionalParameters(optionalArguments);
+        return getNormalizedSvg(html, params.options);
     };
 
     /**

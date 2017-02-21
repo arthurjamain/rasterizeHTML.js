@@ -31,6 +31,10 @@ var rasterize = (function (util, browser, documentHelper, document2svg, svg2imag
         }
     };
 
+    var getNormalizedSvg = function (element, options) {
+        return document2svg.drawDocumentAsSvg(element, options);
+    }
+
     var doDraw = function (element, canvas, options) {
         return document2svg.drawDocumentAsSvg(element, options)
             .then(drawSvgAsImg)
@@ -55,6 +59,33 @@ var rasterize = (function (util, browser, documentHelper, document2svg, svg2imag
                 };
             });
     };
+
+    module.getNormalizedSvg = function (element, options) {
+      var inlineOptions;
+
+      inlineOptions = util.clone(options);
+      inlineOptions.inlineScripts = options.executeJs === true;
+
+      return inlineresources.inlineReferences(element, inlineOptions)
+          .then(function (errors) {
+              if (options.executeJs) {
+                  return operateJavaScriptOnDocument(element, options)
+                      .then(function (result) {
+                          return {
+                              element: result.document.documentElement,
+                              errors: errors.concat(result.errors)
+                          };
+                      });
+              } else {
+                  return {
+                      element: element,
+                      errors: errors
+                  };
+              }
+          }).then(function (result) {
+              return getNormalizedSvg(result.element, options);
+          });
+    }
 
     module.rasterize = function (element, canvas, options) {
         var inlineOptions;
